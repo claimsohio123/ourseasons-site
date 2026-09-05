@@ -1,0 +1,97 @@
+.text-label {
+  display: block !important;
+  margin-bottom: 10px !important;
+}
+
+.text-label .label-text {
+  display: block !important;
+  margin-bottom: 6px !important;
+}
+
+.form-input {
+  display: block !important;
+  width: 100% !important;
+  padding: 10px !important;
+  border-radius: 6px !important;
+  box-sizing: border-box !important;
+}
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.number-label {
+    font-size: 18px !important;
+}
+.background-image.review-section:before, .inner-page-banner .page-banner:before {
+    background-color: rgba(0, 0, 0, 0.50) !important;
+}
+.slmp_slider {
+    z-index: 1;
+}
+.entry-content ol{
+    padding: 0 0 5px 30px!important;
+}
+.footer-col-item.custom-footer-html a{
+    color:#888!important;
+}
+.form-field-disclaimer {
+    text-align: left;
+    color: #ffffff;
+    font-size: 12px;
+}
+.gbp-home {
+    margin: 20px 0;
+}
+.check label {
+   display: block !important;
+}
+.form-container .form-field .form-field-item select {
+   height: 43px;
+}
+.cta-section.layout-1 .form-field .form-field-item {
+   width: 49% !important;
+}
+.col-1.form-field-item.form-field-message.relative, 
+.col-1.form-field-item.form-field-desclaimer.check.relative {
+    width: 100% !important;
+}
+.cta-section-row .col-1.form-field-item.form-recaptcha.text-center.relative {
+    position: relative;
+    margin: auto;
+}
+.col-1.form-field-item.form-field-submit.relative {
+    width: 100% !important;
+    margin-top: 20px;
+    text-align: center;
+}
+.form-container .form-field button {
+    width: 50% !important;
+}
+@media only screen and (min-width: 1024px) {
+    .genesis-nav-menu a {
+        font-size: 13px !important;
+    }
+    .contact-page-wrap .contact-page-info .contact-site-name {
+        font-size: 28px !important;
+    }
+}
+@media only screen and (max-width: 1023px) {
+    .dashicons-before:before {
+        color: #bfbfbf !important;
+    }
+    .cta-section.layout-1 .form-field .form-field-item {
+        width: 100% !important;
+        padding-top: 15px;
+    }
+}
+@media only screen and (max-width: 375px) {
+    
+}
