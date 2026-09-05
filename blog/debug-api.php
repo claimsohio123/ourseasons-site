@@ -1,18 +1,39 @@
 <?php
-require_once __DIR__ . '/wp-cms-api.php';
 header('Content-Type: text/plain');
 
-echo "Bootstrap OK: " . var_export(wpcms_bootstrap(), true) . "\n";
-echo "dirname(__DIR__): " . dirname(__DIR__) . "\n";
-echo "Expected wp-load: " . dirname(__DIR__) . "/cms/wp-load.php\n";
-echo "File exists: " . var_export(file_exists(dirname(__DIR__) . '/cms/wp-load.php'), true) . "\n\n";
+$doc_root = $_SERVER['DOCUMENT_ROOT'] ?? '(no definido)';
+echo "DOCUMENT_ROOT: $doc_root\n";
+echo "dirname(__DIR__): " . dirname(__DIR__) . "\n\n";
 
-$res = wpcms_fetch('posts', ['per_page' => 3]);
-echo "Error: " . var_export($res['error'], true) . "\n";
-echo "Total pages: " . var_export($res['total_pages'], true) . "\n";
-echo "Data count: " . (is_array($res['data']) ? count($res['data']) : 'n/a') . "\n";
-if (is_array($res['data'])) {
-    foreach ($res['data'] as $p) {
-        echo " - " . $p['title']['rendered'] . " (" . $p['slug'] . ")\n";
+echo "=== Contenido de public_html (dirname(__DIR__)) ===\n";
+$base = dirname(__DIR__);
+if (is_dir($base)) {
+    foreach (scandir($base) as $item) {
+        if ($item === '.' || $item === '..') continue;
+        $full = $base . '/' . $item;
+        echo (is_dir($full) ? '[DIR]  ' : '[FILE] ') . $item . "\n";
     }
+} else {
+    echo "No es un directorio accesible.\n";
+}
+
+echo "\n=== Buscando wp-load.php un nivel arriba de public_html ===\n";
+$parent = dirname($base);
+if (is_dir($parent)) {
+    foreach (scandir($parent) as $item) {
+        if ($item === '.' || $item === '..') continue;
+        echo (is_dir($parent . '/' . $item) ? '[DIR]  ' : '[FILE] ') . $item . "\n";
+    }
+}
+
+echo "\n=== Candidatos de wp-load.php ===\n";
+$candidates = [
+    $base . '/cms/wp-load.php',
+    $base . '/Cms/wp-load.php',
+    $base . '/CMS/wp-load.php',
+    $parent . '/cms/wp-load.php',
+    $parent . '/public_html/cms/wp-load.php',
+];
+foreach ($candidates as $c) {
+    echo (file_exists($c) ? 'EXISTE -> ' : 'no existe -> ') . $c . "\n";
 }
