@@ -1,7 +1,7 @@
 <?php
-// Cliente simple para la API REST del WordPress "headless" instalado en /wp-cms
+// Cliente simple para la API REST del WordPress "headless" instalado en /cms
 // Cambia esta constante si alguna vez mueves el WordPress a otra carpeta/subdominio.
-define('WPCMS_API_BASE', 'https://fourseasonsconstructionllc.com/wp-cms/wp-json/wp/v2');
+define('WPCMS_API_BASE', 'https://fourseasonsconstructionllc.com/cms/wp-json/wp/v2');
 
 /**
  * Hace un GET a la API REST de WordPress.

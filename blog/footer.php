@@ -120,7 +120,7 @@
 <script id="contact-form-7-js-before">
 var wpcf7 = {
     "api": {
-        "root": "https:\/\/fourseasonsconstructionllc.com\/wp-cms\/wp-json\/",
+        "root": "https:\/\/fourseasonsconstructionllc.com\/cms\/wp-json\/",
         "namespace": "contact-form-7\/v1"
     }
 };
