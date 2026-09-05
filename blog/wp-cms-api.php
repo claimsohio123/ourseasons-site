@@ -1,76 +1,114 @@
 <?php
-// Cliente simple para la API REST del WordPress "headless" instalado en /cms
-// Cambia esta constante si alguna vez mueves el WordPress a otra carpeta/subdominio.
-define('WPCMS_API_BASE', 'https://fourseasonsconstructionllc.com/cms/wp-json/wp/v2');
+// Puente directo (sin HTTP) hacia el WordPress "headless" instalado en /cms.
+// Evita llamar por HTTPS al propio servidor (falla detrás del CDN de Hostinger)
+// cargando WordPress como librería PHP en el mismo proceso.
+
+function wpcms_bootstrap() {
+    static $ready = null;
+    if ($ready !== null) return $ready;
+
+    if (!defined('WP_USE_THEMES')) define('WP_USE_THEMES', false);
+
+    $candidates = [
+        dirname(__DIR__) . '/cms/wp-load.php',
+        rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/') . '/cms/wp-load.php',
+    ];
+
+    foreach ($candidates as $path) {
+        if ($path && file_exists($path)) {
+            require_once $path;
+            $ready = true;
+            return true;
+        }
+    }
+    $ready = false;
+    return false;
+}
+
+/** Convierte un WP_Post en un arreglo con la misma forma que la REST API (para no tocar las plantillas). */
+function wpcms_post_to_array($post) {
+    $post_id = $post->ID;
+    $categories = [];
+    foreach (wp_get_post_categories($post_id, ['fields' => 'all']) as $term) {
+        $categories[] = ['id' => $term->term_id, 'name' => $term->name, 'slug' => $term->slug, 'taxonomy' => 'category'];
+    }
+    $tags = [];
+    foreach (wp_get_post_tags($post_id, ['fields' => 'all']) as $term) {
+        $tags[] = ['id' => $term->term_id, 'name' => $term->name, 'slug' => $term->slug, 'taxonomy' => 'post_tag'];
+    }
+
+    $embedded = ['wp:term' => [$categories, $tags]];
+
+    $thumb_url = get_the_post_thumbnail_url($post_id, 'full');
+    if ($thumb_url) {
+        $embedded['wp:featuredmedia'] = [['source_url' => $thumb_url]];
+    }
+
+    $author_name = get_the_author_meta('display_name', $post->post_author);
+    $embedded['author'] = [['name' => $author_name ?: 'Four Seasons Construction, LLC']];
+
+    return [
+        'id' => $post_id,
+        'slug' => $post->post_name,
+        'date' => $post->post_date,
+        'title' => ['rendered' => get_the_title($post_id)],
+        'content' => ['rendered' => apply_filters('the_content', $post->post_content)],
+        'excerpt' => ['rendered' => apply_filters('the_excerpt', get_the_excerpt($post_id))],
+        '_embedded' => $embedded,
+    ];
+}
 
 /**
- * Hace un GET a la API REST de WordPress.
- * Devuelve ['data' => array|null, 'total_pages' => int, 'error' => string|null]
+ * Reemplaza las llamadas REST que usaban las plantillas.
+ * Soporta path 'posts' (listado o por slug) — devuelve la misma forma que antes.
  */
 function wpcms_fetch($path, $params = []) {
-    $url = WPCMS_API_BASE . '/' . ltrim($path, '/');
-    if (!empty($params)) {
-        $url .= '?' . http_build_query($params);
-    }
-
     $result = ['data' => null, 'total_pages' => 1, 'error' => null];
 
-    if (function_exists('curl_init')) {
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 12,
-            CURLOPT_HEADER => true,
-            CURLOPT_SSL_VERIFYPEER => true,
-            CURLOPT_USERAGENT => 'FourSeasonsSite/1.0',
-        ]);
-        $response = curl_exec($ch);
-        if ($response === false) {
-            $result['error'] = curl_error($ch);
-            curl_close($ch);
-            return $result;
-        }
-        $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        $headers_raw = substr($response, 0, $header_size);
-        $body = substr($response, $header_size);
-
-        if ($status < 200 || $status >= 300) {
-            $result['error'] = "HTTP $status";
-            return $result;
-        }
-
-        if (preg_match('/X-WP-TotalPages:\s*(\d+)/i', $headers_raw, $m)) {
-            $result['total_pages'] = (int) $m[1];
-        }
-
-        $decoded = json_decode($body, true);
-        if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
-            $result['error'] = 'Respuesta inválida del CMS';
-            return $result;
-        }
-        $result['data'] = $decoded;
+    if (!wpcms_bootstrap()) {
+        $result['error'] = 'No se pudo cargar WordPress desde /cms';
         return $result;
     }
 
-    // Fallback sin cURL
-    $context = stream_context_create(['http' => ['timeout' => 12, 'ignore_errors' => true]]);
-    $body = @file_get_contents($url, false, $context);
-    if ($body === false) {
-        $result['error'] = 'No se pudo conectar con el CMS';
+    if ($path === 'posts') {
+        $args = [
+            'post_type' => 'post',
+            'post_status' => 'publish',
+            'posts_per_page' => $params['per_page'] ?? 10,
+            'paged' => $params['page'] ?? 1,
+        ];
+        if (!empty($params['slug'])) {
+            $args['name'] = $params['slug'];
+            $args['posts_per_page'] = 1;
+        }
+        if (!empty($params['categories'])) {
+            $args['cat'] = (int) $params['categories'];
+        }
+        if (!empty($params['tags'])) {
+            $args['tag_id'] = (int) $params['tags'];
+        }
+
+        $query = new WP_Query($args);
+        $posts = [];
+        foreach ($query->posts as $p) {
+            $posts[] = wpcms_post_to_array($p);
+        }
+        $result['data'] = $posts;
+        $result['total_pages'] = max(1, (int) $query->max_num_pages);
+        wp_reset_postdata();
         return $result;
     }
-    if (isset($http_response_header)) {
-        foreach ($http_response_header as $h) {
-            if (preg_match('/X-WP-TotalPages:\s*(\d+)/i', $h, $m)) {
-                $result['total_pages'] = (int) $m[1];
-            }
+
+    if ($path === 'categories' || $path === 'tags') {
+        $taxonomy = $path === 'tags' ? 'post_tag' : 'category';
+        if (!empty($params['slug'])) {
+            $term = get_term_by('slug', $params['slug'], $taxonomy);
+            $result['data'] = $term ? [['id' => $term->term_id, 'name' => $term->name, 'slug' => $term->slug]] : [];
         }
+        return $result;
     }
-    $decoded = json_decode($body, true);
-    $result['data'] = $decoded;
+
+    $result['error'] = "Ruta no soportada: $path";
     return $result;
 }
 
