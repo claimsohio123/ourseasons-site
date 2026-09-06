@@ -71,7 +71,7 @@
 <li class="menu-item"><a href="../areas-we-serve/index.html">Areas We Serve</a></li>
 <li class="menu-item"><a href="../gallery/index.html">Gallery</a></li>
 <li class="menu-item"><a href="../reviews/index.html">Reviews</a></li>
-<li class="menu-item current-menu-item"><a href="index.php">Blog</a></li>
+<li class="menu-item current-menu-item"><a href="./">Blog</a></li>
 <li class="menu-item"><a href="../contact/index.html">Contact</a></li>
 <li class="menu-item"><a href="../filing-an-insurance-claim/index.html">Filing an Insurance Claim?</a></li>
 <li class="menu-item"><a href="../privacy-policy/index.html" rel="privacy-policy">Privacy Policy</a></li>

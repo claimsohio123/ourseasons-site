@@ -97,7 +97,7 @@ if (!isset($banner_title)) { $banner_title = $page_title; }
 <li class="menu-item menu-item-type-post_type menu-item-object-page"><a href="../areas-we-serve/index.html"><span>Areas We Serve</span></a></li>
 <li class="menu-item menu-item-type-post_type menu-item-object-page"><a href="../gallery/index.html"><span>Gallery</span></a></li>
 <li class="menu-item menu-item-type-post_type menu-item-object-page"><a href="../reviews/index.html"><span>Reviews</span></a></li>
-<li class="menu-item menu-item-type-post_type menu-item-object-page current-menu-item"><a aria-current="page" href="index.php"><span>Blog</span></a></li>
+<li class="menu-item menu-item-type-post_type menu-item-object-page current-menu-item"><a aria-current="page" href="./"><span>Blog</span></a></li>
 <li class="menu-item menu-item-type-post_type menu-item-object-page"><a href="../contact/index.html"><span>Contact</span></a></li>
 <li class="menu-item menu-item-type-post_type menu-item-object-page"><a href="../filing-an-insurance-claim/index.html"><span>Filing an Insurance Claim?</span></a></li>
 </ul></div></nav></div>

@@ -20,7 +20,7 @@ if ($res['error'] || empty($posts) || !is_array($posts)) {
     ?>
     <div class="archive-description posts-page-description">
         <h1 class="archive-title">This Page Does Not Exist</h1>
-        <p>Sorry, we couldn't find that article. <a href="index.php">Back to the blog</a> or <a href="../contact/index.html">contact us</a> for help.</p>
+        <p>Sorry, we couldn't find that article. <a href="./">Back to the blog</a> or <a href="../contact/index.html">contact us</a> for help.</p>
     </div>
     <?php
     include __DIR__ . '/footer.php';
